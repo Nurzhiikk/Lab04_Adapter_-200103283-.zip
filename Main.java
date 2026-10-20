@@ -1,67 +1,80 @@
-import java.util.List;
 
+interface Pizza {
+    double getPrice();
+    String getDescription();
+}
+
+
+class PlainPizza implements Pizza {
+    public double getPrice() {
+        return 5.0;
+    }
+
+    public String getDescription() {
+        return "Plain Dough & Sauce";
+    }
+}
+
+abstract class ToppingDecorator implements Pizza {
+    protected Pizza pizza;
+
+    public ToppingDecorator(Pizza pizza) {
+        this.pizza = pizza;
+    }
+}
+
+class Cheese extends ToppingDecorator {
+    public Cheese(Pizza pizza) {
+        super(pizza);
+    }
+
+    public double getPrice() {
+        return pizza.getPrice() + 2.0;
+    }
+
+    public String getDescription() {
+        return pizza.getDescription() + ", Cheese";
+    }
+}
+
+
+class Olives extends ToppingDecorator {
+    public Olives(Pizza pizza) {
+        super(pizza);
+    }
+
+    public double getPrice() {
+        return pizza.getPrice() + 1.0;
+    }
+
+    public String getDescription() {
+        return pizza.getDescription() + ", Olives";
+    }
+}
+
+
+class Pineapple extends ToppingDecorator {
+    public Pineapple(Pizza pizza) {
+        super(pizza);
+    }
+
+    public double getPrice() {
+        return pizza.getPrice() + 1.5;
+    }
+
+    public String getDescription() {
+        return pizza.getDescription() + ", Pineapple";
+    }
+}
 public class Main {
     public static void main(String[] args) {
-        System.out.println("==================================================");
-        System.out.println("OMNIHOME SMART CONTROLLER: SYSTEM STARTUP");
-        System.out.println("==================================================");
+        Pizza myPizza = new PlainPizza();
 
-        LegacyBulb rawBulb = new LegacyBulb();
-        LegacyThermostat rawThermostat = new LegacyThermostat();
+        myPizza = new Cheese(myPizza);
+        myPizza = new Olives(myPizza);
+        myPizza = new Pineapple(myPizza);
 
-
-        BulbAdapter bulbAdapter = new BulbAdapter(rawBulb);
-        ThermostatAdapter thermostatAdapter = new ThermostatAdapter(rawThermostat);
-        System.out.println("[Init] LegacyBulb and LegacyThermostat initialized and wrapped.");
-
-
-        List<SmartDevice> deviceList = List.of(bulbAdapter, thermostatAdapter);
-        ModernHub hub = new ModernHub(deviceList);
-        System.out.println("[Hub] Registering 2 adapted devices into ModernHub...\n");
-
-
-        System.out.println("--- OPERATION: ACTIVATE ALL DEVICES ---");
-        System.out.println("[Action] ModernHub.activateAll() invoked.");
-        hub.activateAll();
-        System.out.println("-> BulbAdapter: Brightness set to 255.");
-        System.out.println("-> ThermostatAdapter: Dial set to 'LOW'.");
-
-        boolean allActive = bulbAdapter.isOn() && thermostatAdapter.isOn();
-        System.out.println("[Status] All devices reported active: " + allActive);
-
-        double avgPower = hub.calculateAveragePowerUsage();
-        System.out.printf("[Power] Fleet Average Power Usage: %.2f%% (Bulb: %d%%, Thermostat: %d%%)\n\n",
-                avgPower, bulbAdapter.getPowerPercent(), thermostatAdapter.getPowerPercent());
-
-
-        System.out.println("--- AUDIT: HARDWARE FAULT INJECTION (STAGE 4) ---");
-
-
-        System.out.println("[Fault 1] Filament physically severed on LegacyBulb...");
-        rawBulb.breakFilament();
-        System.out.println("-> BulbAdapter.isOn(): " + bulbAdapter.isOn() +
-                " [PASSED - Verified disconnected]");
-        System.out.println("-> BulbAdapter.getPowerPercent(): " + bulbAdapter.getPowerPercent() +
-                "% [PASSED - Inactive power confirmed]\n");
-
-
-        System.out.println("[Fault 2] Dial encoder set to illegal 'STUCK' state on LegacyThermostat...");
-        rawThermostat.rotateDial("STUCK");
-        System.out.println("-> ThermostatAdapter.isOn(): " + thermostatAdapter.isOn() +
-                " [PASSED - Inactive flag confirmed]");
-        System.out.println("-> ThermostatAdapter.getPowerPercent(): " + thermostatAdapter.getPowerPercent() +
-                " [PASSED - Sensor fault sentinel returned]\n");
-
-
-        System.out.println("--- OPERATION: EMERGENCY SHUTDOWN ---");
-        System.out.println("[Action] ModernHub.emergencyShutdown() invoked.");
-        hub.emergencyShutdown();
-        System.out.println("-> BulbAdapter: Brightness set to 0.");
-        System.out.println("-> ThermostatAdapter: Dial rotated to 'IDLE'.");
-
-        System.out.printf("[Power] Fleet Average Power Usage: %.2f%%\n", hub.calculateAveragePowerUsage());
-        System.out.println("==================================================");
-        System.out.println("ALL INTEGRATION TESTS PASSED (100/100)");
-        System.out.println("==================================================");
+        System.out.println("Description: " + myPizza.getDescription());
+        System.out.printf("Total Cost: $%.2f%n", myPizza.getPrice());
     }
 }
